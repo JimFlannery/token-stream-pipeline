@@ -12,6 +12,7 @@ import os
 import signal
 import sys
 from pathlib import Path
+from typing import Any
 
 import structlog
 import websockets
@@ -45,7 +46,7 @@ def _make_producer() -> SerializingProducer:
     )
 
 
-def _to_record(trade: dict) -> dict:
+def _to_record(trade: dict[str, Any]) -> dict[str, Any]:
     side = trade.get("side", "UNKNOWN")
     if side not in ("BUY", "SELL"):
         side = "UNKNOWN"
@@ -59,7 +60,7 @@ def _to_record(trade: dict) -> dict:
     }
 
 
-def _delivery(err, msg) -> None:
+def _delivery(err: Any, msg: Any) -> None:
     if err is not None:
         log.error("delivery_failed", error=str(err), topic=msg.topic())
 

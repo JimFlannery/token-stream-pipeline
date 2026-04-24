@@ -1,10 +1,12 @@
 # token-stream-pipeline
 
-Real-time crypto pricing pipeline: Binance WebSocket + Pyth Network oracle → Kafka (Redpanda) → PyFlink stream processing → ClickHouse → Grafana.
+Real-time crypto pricing pipeline: Coinbase Advanced Trade WebSocket + Pyth Network oracle → Kafka (Redpanda) → PyFlink stream processing → ClickHouse → Grafana.
+
+![token-stream-pipeline demo](token-stream-pipeline.gif)
 
 ## Scope
 
-Tracks SOL/USDC across one centralized exchange and one on-chain oracle, computing cross-source spread, rolling OHLCV bars, order book imbalance, and USDC peg drift — all in real time.
+Tracks SOL/USD and SOL/USDT across one centralized exchange and one on-chain oracle, computing cross-source spread, rolling OHLCV bars, order book imbalance, and USDC peg drift — all in real time.
 
 ## Stack
 
@@ -21,8 +23,8 @@ Tracks SOL/USDC across one centralized exchange and one on-chain oracle, computi
 
 ## Data sources
 
-- **Binance WebSocket** — `solusdt@aggTrade`, `solusdc@aggTrade`, `solusdt@bookTicker`, `solusdc@bookTicker`, `solusdt@depth@100ms`, `usdcusdt@bookTicker`
-- **Pyth Hermes SSE** — SOL/USD, USDC/USD oracle prices
+- **Coinbase Advanced Trade WebSocket** — `SOL-USD` and `SOL-USDT` market trades, ticker, and level2 order book
+- **Pyth Hermes SSE** — SOL/USD and USDC/USD oracle prices
 
 ## Quick start
 
@@ -38,11 +40,39 @@ See [ROADMAP.md](ROADMAP.md) for the day-by-day build plan, and [CLAUDE.md](CLAU
 
 ## Architecture
 
-```
-Binance WS ─┐
-            ├─► Python producers ─► Redpanda topics ─► PyFlink ─► ClickHouse ─► Grafana
-Pyth Hermes ┘                             │
-                                   Schema Registry
+```mermaid
+flowchart LR
+    subgraph sources["Data Sources"]
+        coinbase["Coinbase Advanced Trade\nWebSocket"]
+        pyth["Pyth Network\nHermes SSE"]
+    end
+
+    subgraph ingest["Ingestion"]
+        prod["Python asyncio\nproducers"]
+        sr["Schema Registry\nAvro"]
+    end
+
+    subgraph broker["Redpanda  ·  Kafka API"]
+        topics["topics"]
+    end
+
+    subgraph flink["PyFlink Jobs"]
+        ohlcv["OHLCV bars\n1s · 10s · 1m"]
+        spread["Cross-source spread\n+ rolling z-score"]
+        peg["USDC peg\ndrift alerts"]
+        imb["Order book\nimbalance"]
+    end
+
+    ch[("ClickHouse\nKafka engine + MVs")]
+    grafana["Grafana\ndashboards"]
+
+    coinbase --> prod
+    pyth --> prod
+    prod -- schema validation --> sr
+    prod --> topics
+    topics --> ohlcv & spread & peg & imb
+    ohlcv & spread & peg & imb --> ch
+    ch --> grafana
 ```
 
 ## Ports

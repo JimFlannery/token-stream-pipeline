@@ -12,8 +12,9 @@ import json
 import os
 import signal
 import sys
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
+from typing import Any
 
 import structlog
 import websockets
@@ -57,7 +58,7 @@ def _float_or_none(v: str | None) -> float | None:
         return None
 
 
-def _to_record(ticker: dict) -> dict:
+def _to_record(ticker: dict[str, Any]) -> dict[str, Any]:
     return {
         "product_id": ticker["product_id"],
         "price": float(ticker["price"]),
@@ -69,11 +70,11 @@ def _to_record(ticker: dict) -> dict:
         "low_24_h": _float_or_none(ticker.get("low_24_h")),
         "high_24_h": _float_or_none(ticker.get("high_24_h")),
         "price_percent_chg_24_h": _float_or_none(ticker.get("price_percent_chg_24_h")),
-        "received_at": datetime.now(timezone.utc).isoformat(),
+        "received_at": datetime.now(UTC).isoformat(),
     }
 
 
-def _delivery(err, msg) -> None:
+def _delivery(err: Any, msg: Any) -> None:
     if err is not None:
         log.error("delivery_failed", error=str(err), topic=msg.topic())
 
@@ -88,9 +89,7 @@ async def run() -> None:
         for sig in (signal.SIGINT, signal.SIGTERM):
             loop.add_signal_handler(sig, stop.set)
 
-    subscribe = json.dumps(
-        {"type": "subscribe", "product_ids": PRODUCTS, "channel": "ticker"}
-    )
+    subscribe = json.dumps({"type": "subscribe", "product_ids": PRODUCTS, "channel": "ticker"})
 
     async for ws in websockets.connect(WS_URL, ping_interval=20, ping_timeout=20):
         count = 0
@@ -114,7 +113,12 @@ async def run() -> None:
                         )
                         count += 1
                         if count % 50 == 0:
-                            log.info("produced", count=count, product=ticker["product_id"], price=ticker["price"])
+                            log.info(
+                                "produced",
+                                count=count,
+                                product=ticker["product_id"],
+                                price=ticker["price"],
+                            )
                 producer.poll(0)
             if stop.is_set():
                 break

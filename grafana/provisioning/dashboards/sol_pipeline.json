@@ -1,0 +1,167 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "id": 1,
+      "title": "SOL-USD Price  (1 s close)",
+      "type": "timeseries",
+      "gridPos": { "h": 9, "w": 12, "x": 0, "y": 0 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "tsp-clickhouse" },
+      "targets": [
+        {
+          "datasource": { "type": "grafana-clickhouse-datasource", "uid": "tsp-clickhouse" },
+          "rawSql": "SELECT window_start AS time, close FROM tsp.ohlcv_1s WHERE $__timeFilter(window_start) ORDER BY time",
+          "queryType": "time_series",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyUSD",
+          "color": { "mode": "palette-classic" },
+          "custom": { "lineWidth": 1, "fillOpacity": 10 }
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": { "mode": "single", "sort": "none" },
+        "legend": { "displayMode": "list", "placement": "bottom" }
+      }
+    },
+    {
+      "id": 2,
+      "title": "Order Book Imbalance  (HOP 5 s / 30 s)",
+      "type": "timeseries",
+      "gridPos": { "h": 9, "w": 12, "x": 12, "y": 0 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "tsp-clickhouse" },
+      "targets": [
+        {
+          "datasource": { "type": "grafana-clickhouse-datasource", "uid": "tsp-clickhouse" },
+          "rawSql": "SELECT window_start AS time, avg_imbalance FROM tsp.imbalance WHERE $__timeFilter(window_start) ORDER BY time",
+          "queryType": "time_series",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "min": -1,
+          "max": 1,
+          "color": { "mode": "fixed", "fixedColor": "orange" },
+          "custom": {
+            "lineWidth": 1,
+            "fillOpacity": 20,
+            "thresholdsStyle": { "mode": "line+area" }
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": -0.5 },
+              { "color": "yellow", "value": -0.2 },
+              { "color": "green", "value": 0.2 },
+              { "color": "yellow", "value": 0.5 }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": { "mode": "single", "sort": "none" },
+        "legend": { "displayMode": "list", "placement": "bottom" }
+      }
+    },
+    {
+      "id": 3,
+      "title": "Cross-Source Spread  (Coinbase mid vs Pyth oracle)",
+      "description": "spread = coinbase_mid − pyth_price.  z_score uses a 100-sample rolling window.",
+      "type": "timeseries",
+      "gridPos": { "h": 9, "w": 12, "x": 0, "y": 9 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "tsp-clickhouse" },
+      "targets": [
+        {
+          "datasource": { "type": "grafana-clickhouse-datasource", "uid": "tsp-clickhouse" },
+          "rawSql": "SELECT ts AS time, spread, rolling_mean FROM tsp.cross_source_spread WHERE $__timeFilter(ts) ORDER BY time",
+          "queryType": "time_series",
+          "refId": "A"
+        },
+        {
+          "datasource": { "type": "grafana-clickhouse-datasource", "uid": "tsp-clickhouse" },
+          "rawSql": "SELECT ts AS time, z_score FROM tsp.cross_source_spread WHERE $__timeFilter(ts) ORDER BY time",
+          "queryType": "time_series",
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyUSD",
+          "color": { "mode": "palette-classic" },
+          "custom": { "lineWidth": 1 }
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "z_score" },
+            "properties": [
+              { "id": "unit", "value": "none" },
+              { "id": "custom.axisPlacement", "value": "right" },
+              { "id": "custom.lineWidth", "value": 2 }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "tooltip": { "mode": "multi", "sort": "none" },
+        "legend": { "displayMode": "list", "placement": "bottom" }
+      }
+    },
+    {
+      "id": 4,
+      "title": "USDC Peg Alerts  (Pyth USDC/USD)",
+      "description": "Fires when USDC/USD deviates beyond threshold.  Empty = peg is healthy.",
+      "type": "timeseries",
+      "gridPos": { "h": 9, "w": 12, "x": 12, "y": 9 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "tsp-clickhouse" },
+      "targets": [
+        {
+          "datasource": { "type": "grafana-clickhouse-datasource", "uid": "tsp-clickhouse" },
+          "rawSql": "SELECT ts AS time, usdc_usd, deviation FROM tsp.usdc_peg_alerts WHERE $__timeFilter(ts) ORDER BY time",
+          "queryType": "time_series",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyUSD",
+          "color": { "mode": "palette-classic" },
+          "custom": { "lineWidth": 1, "fillOpacity": 10 }
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "deviation" },
+            "properties": [
+              { "id": "unit", "value": "percentunit" },
+              { "id": "custom.axisPlacement", "value": "right" }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "tooltip": { "mode": "multi", "sort": "none" },
+        "legend": { "displayMode": "list", "placement": "bottom" }
+      }
+    }
+  ],
+  "refresh": "5s",
+  "schemaVersion": 39,
+  "tags": ["crypto", "sol", "streaming"],
+  "templating": { "list": [] },
+  "time": { "from": "now-15m", "to": "now" },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "SOL Streaming Pipeline",
+  "uid": "sol-pipeline",
+  "version": 1
+}

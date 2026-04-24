@@ -8,7 +8,6 @@ Python asyncio services that read from upstream sources and publish to Kafka top
 |---|---|---|
 | `coinbase_trades.py` | Coinbase Advanced Trade WS `market_trades` | `coinbase.sol_usd.trades` |
 | `coinbase_ticker.py` | Coinbase Advanced Trade WS `ticker` | `coinbase.sol_usd.ticker`, `coinbase.sol_usdt.ticker` |
-| `coinbase_level2.py` | Coinbase Advanced Trade WS `level2` | `coinbase.sol_usd.level2` |
 | `pyth_prices.py` | Pyth Hermes SSE | `pyth.sol_usd.prices`, `pyth.usdc_usd.prices` |
 
 ## Why Coinbase, not Binance

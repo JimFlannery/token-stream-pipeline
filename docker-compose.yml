@@ -85,25 +85,36 @@ services:
     env_file: .env
 
   # --- Added day 5 ------------------------------------------------------------
-  # clickhouse:
-  #   image: clickhouse/clickhouse-server:24.10
-  #   container_name: clickhouse
-  #   ulimits:
-  #     nofile: { soft: 262144, hard: 262144 }
-  #   ports:
-  #     - "8123:8123"   # HTTP
-  #     - "9000:9000"   # native
-  #   volumes:
-  #     - ./clickhouse/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+  clickhouse:
+    image: clickhouse/clickhouse-server:24.10
+    container_name: clickhouse
+    depends_on:
+      redpanda:
+        condition: service_healthy
+    ulimits:
+      nofile: { soft: 262144, hard: 262144 }
+    ports:
+      - "8123:8123"   # HTTP interface (curl / Grafana)
+      - "9000:9000"   # native TCP (clickhouse-client)
+    volumes:
+      - ./clickhouse/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "clickhouse-client --query 'SELECT 1'"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
 
   # --- Added day 6 ------------------------------------------------------------
-  # grafana:
-  #   image: grafana/grafana:11.3.0
-  #   container_name: grafana
-  #   ports:
-  #     - "3000:3000"
-  #   environment:
-  #     GF_SECURITY_ADMIN_PASSWORD: admin
-  #     GF_INSTALL_PLUGINS: grafana-clickhouse-datasource
-  #   volumes:
-  #     - ./grafana/provisioning:/etc/grafana/provisioning:ro
+  grafana:
+    image: grafana/grafana:11.3.0
+    container_name: grafana
+    depends_on:
+      clickhouse:
+        condition: service_healthy
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_INSTALL_PLUGINS: grafana-clickhouse-datasource
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro

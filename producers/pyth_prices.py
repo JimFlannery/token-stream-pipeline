@@ -17,6 +17,7 @@ import os
 import signal
 import sys
 from pathlib import Path
+from typing import Any
 
 import aiohttp
 import structlog
@@ -64,7 +65,7 @@ def _make_producer() -> SerializingProducer:
     )
 
 
-def _to_record(parsed: dict) -> dict:
+def _to_record(parsed: dict[str, Any]) -> dict[str, Any]:
     p = parsed["price"]
     e = parsed["ema_price"]
     return {
@@ -78,7 +79,7 @@ def _to_record(parsed: dict) -> dict:
     }
 
 
-def _delivery(err, msg) -> None:
+def _delivery(err: Any, msg: Any) -> None:
     if err is not None:
         log.error("delivery_failed", error=str(err), topic=msg.topic())
 
@@ -99,34 +100,41 @@ async def run() -> None:
     count = 0
     while not stop.is_set():
         try:
-            async with aiohttp.ClientSession() as session:
-                async with session.get(stream_url, timeout=aiohttp.ClientTimeout(total=None)) as resp:
-                    log.info("sse_connected", status=resp.status)
-                    async for line in resp.content:
-                        if stop.is_set():
-                            break
-                        text = line.decode().strip()
-                        if not text.startswith("data:"):
+            async with (
+                aiohttp.ClientSession() as session,
+                session.get(stream_url, timeout=aiohttp.ClientTimeout(total=None)) as resp,
+            ):
+                log.info("sse_connected", status=resp.status)
+                async for line in resp.content:
+                    if stop.is_set():
+                        break
+                    text = line.decode().strip()
+                    if not text.startswith("data:"):
+                        continue
+                    payload = json.loads(text[len("data:") :].strip())
+                    for parsed in payload.get("parsed", []):
+                        feed_id = parsed["id"]
+                        topic = FEED_TOPICS.get(feed_id)
+                        if topic is None:
                             continue
-                        payload = json.loads(text[len("data:"):].strip())
-                        for parsed in payload.get("parsed", []):
-                            feed_id = parsed["id"]
-                            topic = FEED_TOPICS.get(feed_id)
-                            if topic is None:
-                                continue
-                            producer.produce(
-                                topic,
-                                key=feed_id,
-                                value=_to_record(parsed),
-                                on_delivery=_delivery,
+                        producer.produce(
+                            topic,
+                            key=feed_id,
+                            value=_to_record(parsed),
+                            on_delivery=_delivery,
+                        )
+                        count += 1
+                        if count % 20 == 0:
+                            expo = parsed["price"]["expo"]
+                            actual = int(parsed["price"]["price"]) * (10**expo)
+                            log.info(
+                                "produced",
+                                count=count,
+                                topic=topic,
+                                price=f"{actual:.6f}",
                             )
-                            count += 1
-                            if count % 20 == 0:
-                                expo = parsed["price"]["expo"]
-                                actual = int(parsed["price"]["price"]) * (10 ** expo)
-                                log.info("produced", count=count, topic=topic, price=f"{actual:.6f}")
-                        producer.poll(0)
-        except (aiohttp.ClientError, asyncio.TimeoutError) as e:
+                    producer.poll(0)
+        except (TimeoutError, aiohttp.ClientError) as e:
             log.warning("sse_reconnecting", error=str(e))
             await asyncio.sleep(2)
 

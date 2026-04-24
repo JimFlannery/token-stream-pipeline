@@ -23,24 +23,24 @@ Day-by-day plan. Check items off as they complete. The first unchecked item is a
 - [x] Job: USDC peg drift detector on `pyth.usdc_usd.prices` → `alerts.usdc_peg`
 
 ## Day 4 — Cross-source join (flagship job)
-- [ ] Flink job joining Coinbase SOL mid-price with Pyth SOL/USD oracle
-- [ ] Emit spread + rolling z-score to `analytics.sol.cross_source_spread`
-- [ ] Add order book imbalance job from Coinbase `level2` updates
+- [x] Flink job joining Coinbase SOL mid-price with Pyth SOL/USD oracle
+- [x] Emit spread + rolling z-score to `analytics.sol.cross_source_spread`
+- [x] Add order book imbalance job from Coinbase `level2` updates
 
 ## Day 5 — ClickHouse sink + materialized views
-- [ ] Add ClickHouse service to compose
-- [ ] Kafka engine tables consuming the analytics topics
-- [ ] Materialized views aggregating into queryable tables
-- [ ] Verify end-to-end: producer → topic → flink → topic → clickhouse table
+- [x] Add ClickHouse service to compose
+- [x] Kafka engine tables consuming the analytics topics
+- [x] Materialized views aggregating into queryable tables
+- [x] Verify end-to-end: producer → topic → flink → topic → clickhouse table
 
 ## Day 6 — Grafana dashboards
-- [ ] Grafana service + ClickHouse datasource provisioned as code
-- [ ] Dashboards: live prices, cross-source spread, USDC peg drift, order book imbalance
-- [ ] Record a demo GIF
+- [x] Grafana service + ClickHouse datasource provisioned as code
+- [x] Dashboards: live prices, cross-source spread, USDC peg drift, order book imbalance
+- [x] Record a demo GIF
 
 ## Day 7 — Polish + publish
-- [ ] Architecture diagram in README
-- [ ] GitHub Actions: ruff + mypy + `docker compose config` smoke test
+- [x] Architecture diagram in README
+- [x] GitHub Actions: ruff + mypy + `docker compose config` smoke test
 - [ ] Tag v0.1.0
 - [ ] Push to public GitHub
 - [ ] (Stretch) k8s manifests under `k8s/`

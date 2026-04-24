@@ -72,7 +72,7 @@ def main() -> None:
 
     # ── Three inserts submitted as one streaming job ─────────────────────────
     # StatementSet batches multiple DML statements into a single Flink job,
-    # so they share the Kafka consumer and avoid re-reading the topic 3×.
+    # so they share the Kafka consumer and avoid re-reading the topic 3x.
     stmt_set = t_env.create_statement_set()
     for interval, label in WINDOWS:
         stmt_set.add_insert_sql(f"""

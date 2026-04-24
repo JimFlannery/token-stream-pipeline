@@ -78,8 +78,10 @@ def main() -> None:
             CAST(price_raw AS DOUBLE) * POWER(10.0, expo)                      AS usdc_usd,
             ABS(1.0 - CAST(price_raw AS DOUBLE) * POWER(10.0, expo))           AS deviation,
             CASE
-                WHEN ABS(1.0 - CAST(price_raw AS DOUBLE) * POWER(10.0, expo)) > 0.01  THEN 'CRITICAL'
-                WHEN ABS(1.0 - CAST(price_raw AS DOUBLE) * POWER(10.0, expo)) > 0.005 THEN 'WARNING'
+                WHEN ABS(1.0 - CAST(price_raw AS DOUBLE) * POWER(10.0, expo)) > 0.01
+                    THEN 'CRITICAL'
+                WHEN ABS(1.0 - CAST(price_raw AS DOUBLE) * POWER(10.0, expo)) > 0.005
+                    THEN 'WARNING'
                 ELSE 'INFO'
             END                                                                AS severity
         FROM pyth_usdc
