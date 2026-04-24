@@ -1,0 +1,19 @@
+{
+  "type": "record",
+  "name": "TickerEvent",
+  "namespace": "com.pipeline",
+  "doc": "Best-bid/ask snapshot from Coinbase Advanced Trade ticker channel.",
+  "fields": [
+    {"name": "product_id",             "type": "string"},
+    {"name": "price",                  "type": "double", "doc": "Last trade price."},
+    {"name": "best_bid",               "type": "double"},
+    {"name": "best_ask",               "type": "double"},
+    {"name": "best_bid_quantity",      "type": "double"},
+    {"name": "best_ask_quantity",      "type": "double"},
+    {"name": "volume_24_h",            "type": ["null", "double"], "default": null},
+    {"name": "low_24_h",               "type": ["null", "double"], "default": null},
+    {"name": "high_24_h",              "type": ["null", "double"], "default": null},
+    {"name": "price_percent_chg_24_h", "type": ["null", "double"], "default": null},
+    {"name": "received_at",            "type": "string", "doc": "Producer wall-clock ISO-8601 timestamp."}
+  ]
+}

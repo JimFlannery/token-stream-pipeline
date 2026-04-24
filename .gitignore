@@ -1,0 +1,38 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# uv / venv
+.venv/
+venv/
+uv.lock
+
+# env
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker volumes (if bind-mounted locally)
+volumes/
+data/
+
+# Flink artifacts
+*.jar
+
+# Claude Code memory (local only)
+.claude/
+
+# Log output
+logs/

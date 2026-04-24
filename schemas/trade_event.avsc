@@ -1,0 +1,14 @@
+{
+  "type": "record",
+  "name": "TradeEvent",
+  "namespace": "com.pipeline",
+  "doc": "Single trade tick from Coinbase Advanced Trade market_trades channel.",
+  "fields": [
+    {"name": "product_id", "type": "string"},
+    {"name": "trade_id",   "type": "string"},
+    {"name": "price",      "type": "double", "doc": "Execution price (parsed from Coinbase string)."},
+    {"name": "size",       "type": "double", "doc": "Executed quantity in base currency."},
+    {"name": "time",       "type": "string", "doc": "ISO-8601 timestamp from Coinbase."},
+    {"name": "side",       "type": {"type": "enum", "name": "TradeSide", "symbols": ["BUY", "SELL", "UNKNOWN"]}, "default": "UNKNOWN"}
+  ]
+}

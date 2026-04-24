@@ -1,0 +1,15 @@
+{
+  "type": "record",
+  "name": "PythPriceEvent",
+  "namespace": "com.pipeline",
+  "doc": "Price update from Pyth Hermes SSE. Actual price = price_raw * 10^expo.",
+  "fields": [
+    {"name": "feed_id",       "type": "string", "doc": "Hex price feed ID from Pyth."},
+    {"name": "price_raw",     "type": "long",   "doc": "Integer mantissa of the price."},
+    {"name": "conf_raw",      "type": "long",   "doc": "Confidence interval (same exponent as price_raw)."},
+    {"name": "expo",          "type": "int",    "doc": "Shared exponent: actual_price = price_raw * 10^expo."},
+    {"name": "publish_time",  "type": "long",   "doc": "Unix timestamp (seconds) when Pyth validators attested."},
+    {"name": "ema_price_raw", "type": "long"},
+    {"name": "ema_conf_raw",  "type": "long"}
+  ]
+}
