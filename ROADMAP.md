@@ -41,6 +41,6 @@ Day-by-day plan. Check items off as they complete. The first unchecked item is a
 ## Day 7 — Polish + publish
 - [x] Architecture diagram in README
 - [x] GitHub Actions: ruff + mypy + `docker compose config` smoke test
-- [ ] Tag v0.1.0
-- [ ] Push to public GitHub
+- [x] Tag v0.1.0
+- [x] Push to public GitHub
 - [ ] (Stretch) k8s manifests under `k8s/`
