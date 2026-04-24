@@ -6,7 +6,7 @@ Real-time crypto pricing pipeline: Coinbase Advanced Trade WebSocket + Pyth Netw
 
 ## Scope
 
-Tracks SOL/USD and SOL/USDT across one centralized exchange and one on-chain oracle, computing cross-source spread, rolling OHLCV bars, order book imbalance, and USDC peg drift — all in real time.
+Tracks SOL/USD and SOL/USDT across one centralized exchange and one on-chain oracle, computing cross-source spread, rolling OHLCV bars, order book imbalance, and USDC peg drift — all in real time. Please note that USDC peg drift only fires when USDC/USD deviates beyond threshold. No Data = peg is healthy.
 
 ## Stack
 
