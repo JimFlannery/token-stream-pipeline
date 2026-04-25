@@ -1,5 +1,7 @@
 # token-stream-pipeline
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 Real-time crypto pricing pipeline: Coinbase Advanced Trade WebSocket + Pyth Network oracle → Kafka (Redpanda) → PyFlink stream processing → ClickHouse → Grafana.
 
 ![token-stream-pipeline demo](token-stream-pipeline.gif)
