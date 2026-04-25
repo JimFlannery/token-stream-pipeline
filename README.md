@@ -30,15 +30,34 @@ Tracks SOL/USD and SOL/USDT across one centralized exchange and one on-chain ora
 
 ## Quick start
 
-```bash
-# day 1: broker only
-docker compose up -d redpanda redpanda-console
+**Prerequisites:** Docker Desktop, Python 3.11+, [uv](https://github.com/astral-sh/uv)
 
-# open Redpanda Console
-open http://localhost:8080
+```bash
+# 1. Configure environment
+cp .env.example .env          # no secrets needed — all sources are public/unauthenticated
+
+# 2. Start the full stack (Redpanda, Schema Registry, Flink, ClickHouse, Grafana)
+docker compose up -d
+
+# 3. Run producers (each in its own terminal)
+uv run python -m producers.coinbase_trades
+uv run python -m producers.coinbase_ticker
+uv run python -m producers.pyth_prices
+
+# 4. Submit Flink jobs
+docker compose exec flink-jobmanager flink run -py /opt/jobs/ohlcv_bars.py
+docker compose exec flink-jobmanager flink run -py /opt/jobs/cross_source_spread.py
+docker compose exec flink-jobmanager flink run -py /opt/jobs/usdc_peg_drift.py
+docker compose exec flink-jobmanager flink run -py /opt/jobs/order_book_imbalance.py
 ```
 
-See [ROADMAP.md](ROADMAP.md) for the day-by-day build plan, and [CLAUDE.md](CLAUDE.md) for context on design decisions.
+| Dashboard | URL |
+|---|---|
+| Grafana | http://localhost:3000 |
+| Redpanda Console | http://localhost:8080 |
+| Flink Job Manager UI | http://localhost:8082 |
+
+See [ROADMAP.md](ROADMAP.md) for the build plan and [CLAUDE.md](CLAUDE.md) for design decisions.
 
 ## Architecture
 
